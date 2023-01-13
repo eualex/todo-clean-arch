@@ -1,25 +1,35 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useGlobal } from "./context/GlobalContext";
+import { Observer } from "./entity/Observer";
+import { Todo } from "./entity/Todo";
 import { TodoList } from "./entity/TodoList";
+
+const todoList = new TodoList();
 
 function App() {
   const { todosGateway } = useGlobal();
 
-  const [todoList, setTodoList] = useState<TodoList>(new TodoList());
   const descriptionRef = useRef<HTMLInputElement>(null);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-  // useEffect(() => {
-  //   todosGateway.getTodos().then((res) => {
-  //     setTodoList(todo => {
-  //       todo.
-  //     });
-  //   });
-  // }, []);
+  useEffect(() => {
+    todoList.register(new Observer("addTodo", (todo: Todo) => {
+      setTodos(currentTodo => [...currentTodo, todo])
+    }));
+
+    todoList.register(new Observer("deleteTodo", (payload: Todo[]) => {
+      setTodos(payload)
+    }));
+
+    todosGateway.getTodos().then((res) => {
+      todoList.addTodos(res)
+    });
+  }, []);
 
   return (
     <div>
       <div>
-        {todoList.todos?.map((todo) => (
+        {todos?.map((todo) => (
           <Fragment key={todo.description}>
             <div style={{ display: "inline-flex", gap: "1rem" }}>
               <p aria-label="todo_description">{todo.description}</p>
