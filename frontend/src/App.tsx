@@ -1,28 +1,40 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { useGlobal } from "./context/GlobalContext";
-import { Observer } from "./entity/Observer";
 import { Todo } from "./entity/Todo";
 import { TodoList } from "./entity/TodoList";
 
 const todoList = new TodoList();
 
+function useTodos() {
+  const getSnapshot = () => todoList.todos;
+  const subscribe = (observer: Function) => {
+    todoList.subscribe(observer);
+
+    return () => {
+      todoList.unsubscribe(observer);
+    };
+  }
+
+  return useSyncExternalStore(subscribe, getSnapshot);
+}
+
 function App() {
   const { todosGateway } = useGlobal();
 
+  const todos = useTodos();
   const descriptionRef = useRef<HTMLInputElement>(null);
-  const [todos, setTodos] = useState<Todo[]>([]);
+
+  console.log(todos);
 
   useEffect(() => {
-    todoList.register(new Observer("addTodo", (todo: Todo) => {
-      setTodos(currentTodo => [...currentTodo, todo])
-    }));
-
-    todoList.register(new Observer("deleteTodo", (payload: Todo[]) => {
-      setTodos(payload)
-    }));
-
-    todosGateway.getTodos().then((res) => {
-      todoList.addTodos(res)
+    todosGateway.getTodos().then((res: Todo[]) => {
+      todoList.addTodos(res);
     });
   }, []);
 
@@ -34,7 +46,7 @@ function App() {
             <div style={{ display: "inline-flex", gap: "1rem" }}>
               <p aria-label="todo_description">{todo.description}</p>
               <p aria-label="todo_done">{String(todo.done)}</p>
-              <button onClick={() => todo.toggleDone()}>done/undone</button>
+              {/* <button onClick={() => toggleTodoDone(todo)}>done/undone</button> */}
               <button onClick={() => todoList.deleteTodo(todo.description)}>
                 delete
               </button>

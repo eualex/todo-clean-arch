@@ -1,8 +1,7 @@
-import { Observable } from "./Observable";
-import { Observer } from "./Observer";
+import { Subscriber } from "@/infra/observers/Subscriber";
 import { Todo } from "./Todo";
 
-export class TodoList extends Observable {
+export class TodoList extends Subscriber {
   todos: Todo[];
 
   constructor() {
@@ -30,11 +29,11 @@ export class TodoList extends Observable {
 
     const todo = new Todo(description, done)
 
-    todo.register(new Observer('toggleDone', () => {}))
-
     this.todos.push(todo);
 
-    this.notify('addTodo', todo)
+    this.observers.forEach(observer => {
+      observer(this.todos)
+    })
   }
 
   addTodos(todos: any) {
@@ -46,6 +45,6 @@ export class TodoList extends Observable {
   deleteTodo(description: string) {
     this.todos = this.todos.filter((todo) => todo.description !== description);
 
-    this.notify('deleteTodo', this.todos)
+    this.observers.forEach(observer => observer(this.todos))
   }
 }

@@ -1,13 +1,7 @@
-import { Observable } from "./Observable";
-
-export class Todo extends Observable {
-  constructor(readonly description: string, public done: boolean = false) {
-    super()
-  }
+export class Todo {
+  constructor(readonly description: string, public done: boolean = false) {}
 
   toggleDone() {
     this.done = !this.done;
-
-    this.notify('toggleDone', this)
   }
 }

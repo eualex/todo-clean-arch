@@ -1,4 +1,4 @@
-import { TodosGateway } from "@/infra/gateway/TodosGateway";
+import { TodosGateway } from "@/gateway/TodosGateway";
 import { createContext, PropsWithChildren, useContext } from "react";
 
 interface GlobalContextProps {
